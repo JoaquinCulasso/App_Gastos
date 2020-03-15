@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:expenses/Controllers/month_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -10,16 +11,16 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   PageController _pageController;
   int currentPage = 9;
+  Stream<QuerySnapshot> _query;
 
   @override
   void initState() {
     super.initState();
 
-    // Firestore.instance
-    //     .collection('expenses')
-    //     .where("month", isEqualTo: currentPage + 1)
-    //     .snapshots()
-    //     .listen((data) => data.documents.forEach((doc) => print(doc['category'])));
+    _query = Firestore.instance
+        .collection('expenses')
+        .where("month", isEqualTo: currentPage + 1)
+        .snapshots();
 
     _pageController = PageController(
       initialPage: currentPage,
@@ -69,7 +70,19 @@ class _HomePageState extends State<HomePage> {
       child: Column(
         children: <Widget>[
           _selector(),
-          MonthWidget(),
+          StreamBuilder<QuerySnapshot>(
+            stream: _query,
+            builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> data) {
+              if (data.hasData) {
+                return MonthWidget(
+                  documents: data.data.documents,
+                );
+              }
+              return Center(
+                child: CircularProgressIndicator(),
+              );
+            },
+          )
         ],
       ),
     );
@@ -114,6 +127,10 @@ class _HomePageState extends State<HomePage> {
         onPageChanged: (newPage) {
           setState(() {
             currentPage = newPage;
+            _query = Firestore.instance
+                .collection('expenses')
+                .where("month", isEqualTo: currentPage + 1)
+                .snapshots();
           });
         },
         controller: _pageController,
