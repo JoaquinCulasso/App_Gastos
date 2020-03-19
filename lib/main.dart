@@ -1,3 +1,4 @@
+import 'package:expenses/Views/AddPages.dart';
 import 'package:flutter/material.dart';
 
 import 'Views/HomePage.dart';
@@ -12,9 +13,10 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: HomePage(),
+      routes: {
+        '/': (BuildContext context) => HomePage(),
+        '/add': (BuildContext context) => AddPages(),
+      },
     );
   }
 }
-
-
