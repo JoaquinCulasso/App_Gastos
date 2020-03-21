@@ -3,12 +3,12 @@ import 'package:expenses/Controllers/category_selection_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
-class AddPages extends StatefulWidget {
+class AddPage extends StatefulWidget {
   @override
-  _AddPagesState createState() => _AddPagesState();
+  _AddPageState createState() => _AddPageState();
 }
 
-class _AddPagesState extends State<AddPages> {
+class _AddPageState extends State<AddPage> {
   String category;
   double realValue = 0;
   int value = 0;
