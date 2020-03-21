@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:expenses/Controllers/category_selection_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -9,7 +10,8 @@ class AddPages extends StatefulWidget {
 
 class _AddPagesState extends State<AddPages> {
   String category;
-  double value = 0;
+  double realValue = 0;
+  int value = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -68,10 +70,11 @@ class _AddPagesState extends State<AddPages> {
   }
 
   Widget _currentValue() {
+    realValue = value / 100.0;
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 32.0),
       child: Text(
-        "\$${value.toStringAsFixed(2)}",
+        "\$${realValue.toStringAsFixed(2)}",
         style: TextStyle(
           fontSize: 50.0,
           color: Colors.blueAccent,
@@ -82,16 +85,28 @@ class _AddPagesState extends State<AddPages> {
   }
 
   Widget _num(String number, double height) {
-    return Container(
-      height: height,
-      child: Center(
-          child: Text(
-        number,
-        style: TextStyle(
-          fontSize: 40,
-          color: Colors.grey,
-        ),
-      )),
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: () {
+        setState(() {
+          if (number == ',') {
+            value = value * 100;
+          } else {
+            value = value * 10 + int.parse(number);
+          }
+        });
+      },
+      child: Container(
+        height: height,
+        child: Center(
+            child: Text(
+          number,
+          style: TextStyle(
+            fontSize: 40,
+            color: Colors.grey,
+          ),
+        )),
+      ),
     );
   }
 
@@ -129,13 +144,20 @@ class _AddPagesState extends State<AddPages> {
               children: [
                 _num(",", height),
                 _num("0", height),
-                Container(
-                  height: height,
-                  child: Center(
-                    child: Icon(
-                      Icons.backspace,
-                      color: Colors.grey,
-                      size: 40,
+                GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      value = value ~/ 10;
+                    });
+                  },
+                  child: Container(
+                    height: height,
+                    child: Center(
+                      child: Icon(
+                        Icons.backspace,
+                        color: Colors.grey,
+                        size: 40,
+                      ),
                     ),
                   ),
                 )
@@ -147,7 +169,47 @@ class _AddPagesState extends State<AddPages> {
     );
   }
 
-  Widget _submit() => Placeholder(
-        fallbackHeight: 50,
-      );
+  Widget _submit() {
+    return Builder(
+      builder: (BuildContext context) {
+        return Hero(
+          tag: "add_button",
+          child: Container(
+            height: 50.0,
+            width: double.infinity,
+            decoration: BoxDecoration(
+              color: Colors.lightBlueAccent,
+            ),
+            child: MaterialButton(
+              child: Text(
+                "Agregar Gasto",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 20.0,
+                ),
+              ),
+              onPressed: () {
+                if (value > 0 && category != null) {
+                  Firestore.instance.collection('expenses').document().setData({
+                    "category": category,
+                    "value": realValue,
+                    "month": DateTime.now().month,
+                    "day": DateTime.now().day,
+                  });
+                  Navigator.of(context).pop();
+                } else {
+                  Scaffold.of(context).showSnackBar(
+                    SnackBar(
+                      content:
+                          Text("Selecciona un valor mayor a 0 y una categoria"),
+                    ),
+                  );
+                }
+              },
+            ),
+          ),
+        );
+      },
+    );
+  }
 }
