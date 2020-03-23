@@ -1,7 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:expenses/Controllers/category_selection_widget.dart';
+import 'package:expenses/State/login_state.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:provider/provider.dart';
 
 class AddPage extends StatefulWidget {
   @override
@@ -10,7 +12,7 @@ class AddPage extends StatefulWidget {
 
 class _AddPageState extends State<AddPage> {
   String category;
-  double realValue = 0;
+  //double realValue = 0;
   int value = 0;
 
   @override
@@ -70,7 +72,7 @@ class _AddPageState extends State<AddPage> {
   }
 
   Widget _currentValue() {
-    realValue = value / 100.0;
+    double realValue = value / 100.0;
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 32.0),
       child: Text(
@@ -189,10 +191,17 @@ class _AddPageState extends State<AddPage> {
                 ),
               ),
               onPressed: () {
+                var user = Provider.of<LoginState>(context, listen: false)
+                    .currentUser();
                 if (value > 0 && category != null) {
-                  Firestore.instance.collection('expenses').document().setData({
+                  Firestore.instance
+                      .collection('users')
+                      .document(user.uid)
+                      .collection('expenses')
+                      .document()
+                      .setData({
                     "category": category,
-                    "value": realValue,
+                    "value": value / 100,
                     "month": DateTime.now().month,
                     "day": DateTime.now().day,
                   });

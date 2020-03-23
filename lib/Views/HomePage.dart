@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:expenses/Controllers/month_widget.dart';
+import 'package:expenses/Controllers/utils.dart';
 import 'package:expenses/State/login_state.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -12,17 +13,12 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   PageController _pageController;
-  int currentPage = 9;
+  int currentPage = DateTime.now().month - 1;
   Stream<QuerySnapshot> _query;
 
   @override
   void initState() {
     super.initState();
-
-    _query = Firestore.instance
-        .collection('expenses')
-        .where("month", isEqualTo: currentPage + 1)
-        .snapshots();
 
     _pageController = PageController(
       initialPage: currentPage,
@@ -42,33 +38,47 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      bottomNavigationBar: BottomAppBar(
-        notchMargin: 8.0,
-        shape: CircularNotchedRectangle(),
-        child: Row(
-          mainAxisSize: MainAxisSize.max,
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: <Widget>[
-            _bottonAction(FontAwesomeIcons.history, () {}),
-            _bottonAction(FontAwesomeIcons.chartPie, () {}),
-            SizedBox(width: 48.0),
-            _bottonAction(FontAwesomeIcons.wallet, () {}),
-            _bottonAction(Icons.settings, () {
-              Provider.of<LoginState>(context, listen: false).logout();
-            }),
-          ],
-        ),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      floatingActionButton: FloatingActionButton(
-        heroTag: "add_button",
-        child: Icon(Icons.add),
-        onPressed: () {
-          Navigator.of(context).pushNamed('/add');
-        },
-      ),
-      body: _body(),
+    return Consumer<LoginState>(
+      builder: (BuildContext context, LoginState state, Widget child) {
+        var user =
+            Provider.of<LoginState>(context, listen: false).currentUser();
+        _query = Firestore.instance
+            .collection('users')
+            .document(user.uid)
+            .collection('expenses')
+            .where("month", isEqualTo: currentPage + 1)
+            .snapshots();
+
+        return Scaffold(
+          bottomNavigationBar: BottomAppBar(
+            notchMargin: 8.0,
+            shape: CircularNotchedRectangle(),
+            child: Row(
+              mainAxisSize: MainAxisSize.max,
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: <Widget>[
+                _bottonAction(FontAwesomeIcons.history, () {}),
+                _bottonAction(FontAwesomeIcons.chartPie, () {}),
+                SizedBox(width: 48.0),
+                _bottonAction(FontAwesomeIcons.wallet, () {}),
+                _bottonAction(Icons.settings, () {
+                  Provider.of<LoginState>(context, listen: false).logout();
+                }),
+              ],
+            ),
+          ),
+          floatingActionButtonLocation:
+              FloatingActionButtonLocation.centerDocked,
+          floatingActionButton: FloatingActionButton(
+            heroTag: "add_button",
+            child: Icon(Icons.add),
+            onPressed: () {
+              Navigator.of(context).pushNamed('/add');
+            },
+          ),
+          body: _body(),
+        );
+      },
     );
   }
 
@@ -82,6 +92,7 @@ class _HomePageState extends State<HomePage> {
             builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> data) {
               if (data.hasData) {
                 return MonthWidget(
+                  days: daysInMonth(currentPage + 1),
                   documents: data.data.documents,
                 );
               }
@@ -133,8 +144,12 @@ class _HomePageState extends State<HomePage> {
       child: PageView(
         onPageChanged: (newPage) {
           setState(() {
+            var user =
+                Provider.of<LoginState>(context, listen: false).currentUser();
             currentPage = newPage;
             _query = Firestore.instance
+                .collection('users')
+                .document(user.uid)
                 .collection('expenses')
                 .where("month", isEqualTo: currentPage + 1)
                 .snapshots();
