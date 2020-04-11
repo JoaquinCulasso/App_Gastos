@@ -1,10 +1,13 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:expenses/Controllers/add_page_transition.dart';
 import 'package:expenses/Controllers/month_widget.dart';
 import 'package:expenses/Controllers/utils.dart';
 import 'package:expenses/State/login_state.dart';
+import 'package:expenses/Views/AddPage.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
+import 'package:rect_getter/rect_getter.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -12,6 +15,9 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  var globalKey = RectGetter.createGlobalKey();
+  Rect buttonRect;
+
   PageController _pageController;
   int currentPage = DateTime.now().month - 1;
   Stream<QuerySnapshot> _query;
@@ -69,12 +75,26 @@ class _HomePageState extends State<HomePage> {
           ),
           floatingActionButtonLocation:
               FloatingActionButtonLocation.centerDocked,
-          floatingActionButton: FloatingActionButton(
-            heroTag: "add_button",
-            child: Icon(Icons.add),
-            onPressed: () {
-              Navigator.of(context).pushNamed('/add');
-            },
+          floatingActionButton: RectGetter(
+            key: globalKey,
+            child: FloatingActionButton(
+              heroTag: "add_button",
+              child: Icon(Icons.add),
+              onPressed: () {
+                buttonRect = RectGetter.getRectFromKey(globalKey);
+                print(buttonRect);
+
+                var page = AddPageTransition(
+                  background: widget,
+                  page: AddPage(
+                    buttonRect: buttonRect,
+                  ),
+                );
+
+                Navigator.of(context).push(page);
+                // Navigator.of(context).pushNamed('/add', arguments: buttonRect);
+              },
+            ),
           ),
           body: _body(),
         );

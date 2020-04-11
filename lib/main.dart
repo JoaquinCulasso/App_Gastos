@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 // Vistas
 import 'package:expenses/Views/HomePage.dart';
-import 'package:expenses/Views/AddPage.dart';
 import 'package:expenses/Views/LoginPage.dart';
 
 import 'package:expenses/State/login_state.dart';
@@ -20,6 +19,17 @@ class MyApp extends StatelessWidget {
         theme: ThemeData(
           primarySwatch: Colors.blue,
         ),
+        // onGenerateRoute: (settings) {
+        //   Rect buttonRect = settings.arguments;
+        //   if (settings.name == '/add') {
+        //     return AddPageTransition(
+        //       background: ... ,
+        //       page: AddPage(
+        //         buttonRect: buttonRect,
+        //       ),
+        //     );
+        //   }
+        // },
         routes: {
           '/': (BuildContext context) {
             var state = Provider.of<LoginState>(context);
@@ -29,7 +39,7 @@ class MyApp extends StatelessWidget {
               return LoginPage();
             }
           },
-          '/add': (BuildContext context) => AddPage(),
+          //'/add': (BuildContext context) => AddPage(),
         },
       ),
     );
