@@ -6,6 +6,7 @@ class AddPageTransition extends PageRouteBuilder {
 
   AddPageTransition({this.background, this.page})
       : super(
+          // transitionDuration: Duration(microseconds: 1),
           pageBuilder: (context, animation1, animation2) => page,
           transitionsBuilder: (context, animation1, animation, child) => Stack(
             children: <Widget>[

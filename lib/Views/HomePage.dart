@@ -21,6 +21,7 @@ class _HomePageState extends State<HomePage> {
   PageController _pageController;
   int currentPage = DateTime.now().month - 1;
   Stream<QuerySnapshot> _query;
+  GraphType currentType = GraphType.LINES;
 
   @override
   void initState() {
@@ -63,8 +64,16 @@ class _HomePageState extends State<HomePage> {
               mainAxisSize: MainAxisSize.max,
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: <Widget>[
-                _bottonAction(FontAwesomeIcons.history, () {}),
-                _bottonAction(FontAwesomeIcons.chartPie, () {}),
+                _bottonAction(FontAwesomeIcons.chartLine, () {
+                  setState(() {
+                    currentType = GraphType.LINES;
+                  });
+                }),
+                _bottonAction(FontAwesomeIcons.chartPie, () {
+                  setState(() {
+                    currentType = GraphType.PIE;
+                  });
+                }),
                 SizedBox(width: 48.0),
                 _bottonAction(FontAwesomeIcons.wallet, () {}),
                 _bottonAction(Icons.settings, () {
@@ -114,6 +123,8 @@ class _HomePageState extends State<HomePage> {
                 return MonthWidget(
                   days: daysInMonth(currentPage + 1),
                   documents: data.data.documents,
+                  graphType: currentType,
+                  month: currentPage,
                 );
               }
               return Center(

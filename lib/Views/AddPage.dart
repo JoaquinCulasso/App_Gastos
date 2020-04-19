@@ -28,7 +28,7 @@ class _AddPageState extends State<AddPage> with SingleTickerProviderStateMixin {
 
     _controller = AnimationController(
       vsync: this,
-      duration: Duration(seconds: 3),
+      duration: Duration(milliseconds: 750),
     );
 
     _butttonAnimation = Tween<double>(begin: 0.1, end: 1.0).animate(
@@ -242,8 +242,17 @@ class _AddPageState extends State<AddPage> with SingleTickerProviderStateMixin {
             borderRadius: BorderRadius.circular(
               buttonWidth * (1 - _butttonAnimation.value),
             ),
-            color: Colors.blueAccent,
+            color: Colors.lightBlueAccent,
           ),
+          // child: MaterialButton(
+          //   child: Text(
+          //     "Agregar Gasto",
+          //     style: TextStyle(
+          //       color: Colors.white,
+          //       fontSize: 20.0,
+          //     ),
+          //   ),
+          // ),
         ),
       );
     } else {

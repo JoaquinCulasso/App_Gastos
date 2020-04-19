@@ -1,15 +1,23 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:expenses/Views/DetailsPage.dart';
 import 'package:flutter/material.dart';
 import 'package:expenses/Controllers/graph_widget.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+
+enum GraphType {
+  LINES,
+  PIE,
+}
 
 class MonthWidget extends StatefulWidget {
   final List<DocumentSnapshot> documents;
   final double total;
   final List<double> perDay;
   final Map<String, double> categories;
+  final GraphType graphType;
+  final int month;
 
-  MonthWidget({Key key, this.documents, days})
+  MonthWidget({Key key, this.graphType, this.month,this.documents, days})
       : total = documents.map((doc) => doc['value']).fold(0.0, (a, b) => a + b),
         perDay = List.generate(days, (int index) {
           return documents
@@ -72,12 +80,24 @@ class _MonthWidgetState extends State<MonthWidget> {
   }
 
   Widget _graph() {
-    return Container(
-      height: 250.0,
-      child: GraphWidget(
-        data: widget.perDay,
-      ),
-    );
+    if (widget.graphType == GraphType.LINES) {
+      return Container(
+        height: 250.0,
+        child: LineGraphWidget(
+          data: widget.perDay,
+        ),
+      );
+    } else {
+      var perCategory = widget.categories.keys
+          .map((name) => widget.categories[name] / widget.total)
+          .toList();
+      return Container(
+        height: 250.0,
+        child: PieGraphWidget(
+          data: perCategory,
+        ),
+      );
+    }
   }
 
   Widget _list() {
@@ -102,6 +122,9 @@ class _MonthWidgetState extends State<MonthWidget> {
 
   Widget _item(IconData icon, String name, int percent, double value) {
     return ListTile(
+      onTap: () {
+        Navigator.of(context).pushNamed("/details", arguments: DetailsParams(name, widget.month));
+      },
       leading: Icon(icon, size: 32.0),
       title: Text(
         name,
